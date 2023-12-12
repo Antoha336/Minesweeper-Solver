@@ -3,18 +3,13 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <thread>
-#include <chrono>
 
 using namespace sf;
 using namespace std;
 
-void solve(int** board);
-void reset_game();
-
 // Настройки игры
-int board_height = 15; //от 2 до 32 (опираясь на монитор 1920x1080)
-int board_width = 15; //от 2 (10 для комфортной игры) до 60 (опираясь на монитор 1920x1080)
+int board_height = 15; // от 2 до 32 (опираясь на монитор 1920x1080)
+int board_width = 15; // от 2 (10 для комфортной игры) до 60 (опираясь на монитор 1920x1080)
 int amount_of_mines = (board_height * board_width) / 7; // 10 - лёгкий, 7 - средний, 5 - сложный
 
 // Пути к файлам текстур и размер спрайтов
@@ -60,12 +55,12 @@ void check_win() {
 			if (visual_board[i][j] == 11) {
 				amount_of_mines_left--;
 			}
-			if (turns.back()[i][j] != logic_board[i][j] and (turns.back()[i][j] != 11 and logic_board[i][j] != 9) or turns.back()[i][j] == 10) {
+			if ((turns.back()[i][j] != logic_board[i][j] and (turns.back()[i][j] != 11 or logic_board[i][j] != 9)) or turns.back()[i][j] == 10) {
 				is_solved = false;
 			}
 		}
 	}
-	if (is_solved) {
+	if (is_solved and !is_exploded) {
 		solving_status = "solved";
 	}
 	app.setTitle("(" + solving_status + ")" + " (" + to_string(turn_number + 1) + " / " + to_string(turns.size()) + ")" + " (" + to_string(amount_of_mines_left) + ")");
@@ -346,7 +341,7 @@ void solve_uncertainty(int** board) {
 	bool is_edited = false;
 	for (int m = 0; m < board_height; m++) {
 		for (int n = 0; n < board_width; n++) {
-			if (current_board[m][n] == 10) closed_cells++;
+			if (board[m][n] == 10) closed_cells++;
 			else if (current_board[m][n] == 11) flags++;
 			else if (current_board[m][n] > 0 and current_board[m][n] < 9) {
 				int number = current_board[m][n];
@@ -393,7 +388,7 @@ void solve_uncertainty(int** board) {
 		for (int m = 0; m < board_height; m++) {
 			for (int n = 0; n < board_width; n++) {
 				if (board[m][n] == 10) {
-					board[m][n] = logic_board[m][n];
+					open_cell(m, n, board);
 				}
 			}
 		}
